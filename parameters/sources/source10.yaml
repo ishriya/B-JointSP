@@ -1,0 +1,10 @@
+- node: pop1
+  vnf: vnf_user
+  flows:
+  - id: f1
+    data_rate: 2
+- node: pop1
+  vnf: vnf_user1
+  flows:
+  - id: f2
+    data_rate: 1

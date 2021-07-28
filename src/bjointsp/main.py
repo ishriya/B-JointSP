@@ -11,6 +11,7 @@ import bjointsp.read_write.writer as writer
 
 from datetime import datetime
 from bjointsp.heuristic import control
+from bjointsp.template.adapter import adapt_for_reuse
 
 logger = logging.getLogger('bjointsp')
 
@@ -33,7 +34,7 @@ def place(network_file, template_file, source_file, source_template_object=False
     seed = random.randint(0, 9999)
     seed_subfolder = False
     random.seed(seed)
-
+    print(template_file)
     # set up logging into file Data/logs/heuristic/scenario_timestamp_seed.log
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if logging_level is None:
@@ -51,12 +52,24 @@ def place(network_file, template_file, source_file, source_template_object=False
         nodes, links = reader.read_network(network_file, cpu, mem, dr)
 
     # When 'source_template_object' is True, we would need to read from objects instead of files
-    template, source_components = reader.read_template(template_file, template_object=source_template_object,
+
+    # Adjusted to read each multiple templates
+
+    source_components = set()
+    templates = []
+    for filename in template_file:
+        template, source_component = reader.read_template(filename, template_object=source_template_object,
                                                        return_src_components=True)
+        templates.append(template)
+
+        # Adjusted to read source of each templates
+        source_components.update(source_component)
+
     sources = reader.read_sources(source_file, source_components, source_object=source_template_object)
 
-    templates = [template]
-    # print(template)
+  #  templates = [template]
+
+    print(templates)
     # exit()
     components = {j for t in templates for j in t.components}
     fixed = []
@@ -68,13 +81,16 @@ def place(network_file, template_file, source_file, source_template_object=False
     elif prev_embedding_file is not None:
         prev_embedding = reader.read_prev_embedding(prev_embedding_file, templates, nodes, links)
 
-    input_files = [network_file, template_file, source_file, fixed_vnfs, prev_embedding_file]
     # TODO: support >1 template
+    # Added support to more than one template
+    for template_filename in template_file:
+        input_files = [network_file, template_filename, source_file, fixed_vnfs, prev_embedding_file]
+
 
     # print("Using seed {}".format(seed))
 
     logger.info("Starting initial embedding at {}".format(timestamp))
-    # print("Initial embedding\n")
+    print("Initial embedding\n")
     init_time, runtime, obj_value, changed, overlays = control.solve(nodes, links, templates, prev_embedding, sources,
                                                                      fixed, obj, print_best=print_best)
     if overlays is None:
@@ -83,17 +99,19 @@ def place(network_file, template_file, source_file, source_template_object=False
     # If the write_result variable is True we receive the path to a result file
     # If the write_result variable is False we a result dict.
     result = writer.write_heuristic_result(runtime, obj_value, changed, overlays.values(), input_files, obj, nodes,
-                                           links, seed, seed_subfolder, write_result, source_template_object)
+                                       links, seed, seed_subfolder, write_result, source_template_object)
 
     return result
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="B-JointSP heuristic calculates an optimized placement")
-    parser.add_argument("-n", "--network", help="Network input file (.graphml)", required=True, default=None,
-                        dest="network")
-    parser.add_argument("-t", "--template", help="Template input file (.yaml)", required=True, default=None,
-                        dest="template")
+    parser.add_argument("-n", "--network", help="Network input file (.graphml)", required=True, default=None)
+
+   # Adjusted CLI to accept list of templates
+
+    parser.add_argument("-t", "--template", action= 'append', help="Template input file (.yaml)", required=True, default=None)
+
     parser.add_argument("-s", "--sources", help="Sources input file (.yaml)", required=True, default=None,
                         dest="sources")
     parser.add_argument("-f", "--fixed", help="Fixed instances input file (.yaml)", required=False, default=None,
@@ -105,8 +123,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    place(args.network, args.template, args.sources, fixed_vnfs=args.fixed, prev_embedding_file=args.prev, cpu=10,
-          mem=10, dr=50)
+    print(args)
+    place(args.network, args.template, args.sources, fixed_vnfs=args.fixed, prev_embedding_file=args.prev, cpu=5,
+          mem=5, dr=1)
 
 
 if __name__ == '__main__':

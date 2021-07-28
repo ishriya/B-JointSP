@@ -1,7 +1,7 @@
 # example chain template: User -> fw2 -> fw1 -> Web
 name: fw2-chain
 vnfs:
-  - name: vnf_user
+  - name: vnf_user1
     type: source
     stateful: True
     inputs_fwd: 0
@@ -51,13 +51,13 @@ vnfs:
     outputs_bwd: 0
     cpu: [1,0]
     mem: [1,0]
-    vnf_delay: 85
+    vnf_delay: 20
     out_fwd: []
     out_bwd: []
     image: '{"image":"placement-apache-img", "network":"(id=input,ip=99.0.0.2/24)"}'
 vlinks:
   - direction: forward
-    src: vnf_user
+    src: vnf_user1
     src_output: 0
     dest: vnf_fw2
     dest_input: 0

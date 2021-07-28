@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='bjointsp',
-    version='2.4.6',
+    version='2.4.7',
     description='B-JointSP is an algorithm for joint scaling, placement, and routing of uni- or bidirectional network '
                 'services',
     url='https://github.com/CN-UPB/B-JointSP',

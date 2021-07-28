@@ -24,7 +24,7 @@ vnfs:
     outputs_bwd: 0
     cpu: [1,0]
     mem: [1,0]
-    vnf_delay: 35
+    vnf_delay: 5
     out_fwd:
       - [1,0]
     out_bwd: []
@@ -38,7 +38,7 @@ vnfs:
     outputs_bwd: 0
     cpu: [1,0]
     mem: [1,0]
-    vnf_delay: 20
+    vnf_delay: 10
     out_fwd: []
     out_bwd: []
     image: '{"image":"placement-apache-img", "network":"(id=input,ip=99.0.0.2/24)"}'
